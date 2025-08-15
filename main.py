@@ -16,14 +16,11 @@ def main():
     while True:
         display_menu()
         choice = input("Lütfen bir seçenek girin: ")
-
-        if choice == '1':
-            title = input("Kitabın başlığını girin: ")
-            author = input("Yazarın adını girin: ")
-            isbn = input("ISBN numarasını girin: ")
-            new_book = Book(title, author, isbn)
-            library.add_book(new_book)
         
+        if choice == '1':
+            isbn = input("Kitabın ISBN numarasını girin: ")
+            library.add_book(isbn)
+
         elif choice == '2':
             isbn = input("Silmek istediğiniz kitabın ISBN numarasını girin: ")
             library.remove_book(isbn)
