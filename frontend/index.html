@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kütüphane Yönetim Paneli</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Kütüphane Yönetimi</h1>
+
+        <div class="form-section">
+            <h2>Yeni Kitap Ekle</h2>
+            <input type="text" id="addIsbnInput" placeholder="ISBN Numarası Girin">
+            <button id="addBookBtn">Kitap Ekle</button>
+        </div>
+
+        <div class="form-section">
+            <h2>Kitapları Yönet</h2>
+            <input type="text" id="manageIsbnInput" placeholder="ISBN Numarası Girin">
+            <input type="text" id="updateTitleInput" placeholder="Yeni Başlık (Opsiyonel)">
+            <input type="text" id="updateAuthorInput" placeholder="Yeni Yazar (Opsiyonel)">
+            <button id="updateBookBtn">Güncelle</button>
+            <button id="deleteBookBtn">Sil</button>
+        </div>
+
+        <div class="book-list-section">
+            <h2>Tüm Kitaplar</h2>
+            <button id="listBooksBtn">Listeyi Yenile</button>
+            <div id="bookList"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

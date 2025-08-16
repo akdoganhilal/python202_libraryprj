@@ -1,13 +1,31 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from library import Library, Book
 from database import Database
 import httpx
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 
 app = FastAPI()
 db = Database()
 db.create_table()
 library = Library()
+
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8000",
+    "null" 
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class BookSchema(BaseModel):
     title: str
@@ -18,14 +36,11 @@ class ISBNRequest(BaseModel):
     isbn: str
 
 class BookUpdate(BaseModel):
-    title: str
-    author: str
+    title: Optional[str] = None
+    author: Optional[str] = None
 
 @app.get("/books", response_model=list[BookSchema])
 def list_all_books():
-    """
-    Kütüphanedeki tüm kitapların listesini döndürür.
-    """
     book_data = []
     for book in library.books:
         book_data.append({"title": book.title, "author": book.author, "isbn": book.isbn})
@@ -33,9 +48,6 @@ def list_all_books():
 
 @app.get("/books/{isbn}", response_model=BookSchema)
 def get_single_book(isbn: str):
-    """
-    Belirtilen ISBN'e sahip tek bir kitabı bulur ve döndürür.
-    """
     found_book = library.find_book(isbn)
     if not found_book:
         raise HTTPException(status_code=404, detail="Kitap bulunamadı.")
@@ -88,8 +100,11 @@ def update_existing_book(isbn: str, updated_book: BookUpdate):
     if not found_book:
         raise HTTPException(status_code=404, detail="Kitap bulunamadı.")
     
-    library.update_book(isbn, updated_book.title, updated_book.author)
-    
+    new_title = updated_book.title if updated_book.title is not None else found_book.title
+    new_author = updated_book.author if updated_book.author is not None else found_book.author
+
+    library.update_book(isbn, new_title, new_author)
+
     updated_book_obj = library.find_book(isbn)
     return updated_book_obj
 
