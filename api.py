@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from library import Library
-from book import Book
+from library import Library, Book
+from database import Database
 import httpx
 
 app = FastAPI()
+db = Database()
+db.create_table()
 library = Library()
 
 class BookSchema(BaseModel):
@@ -15,12 +17,29 @@ class BookSchema(BaseModel):
 class ISBNRequest(BaseModel):
     isbn: str
 
+class BookUpdate(BaseModel):
+    title: str
+    author: str
+
 @app.get("/books", response_model=list[BookSchema])
-def get_all_books():
+def list_all_books():
+    """
+    Kütüphanedeki tüm kitapların listesini döndürür.
+    """
     book_data = []
     for book in library.books:
         book_data.append({"title": book.title, "author": book.author, "isbn": book.isbn})
     return book_data
+
+@app.get("/books/{isbn}", response_model=BookSchema)
+def get_single_book(isbn: str):
+    """
+    Belirtilen ISBN'e sahip tek bir kitabı bulur ve döndürür.
+    """
+    found_book = library.find_book(isbn)
+    if not found_book:
+        raise HTTPException(status_code=404, detail="Kitap bulunamadı.")
+    return found_book
 
 @app.post("/books", response_model=BookSchema)
 def add_new_book(request: ISBNRequest):
@@ -63,11 +82,22 @@ def add_new_book(request: ISBNRequest):
             detail=f"Beklenmedik bir hata oluştu: {e}"
         )
 
+@app.put("/books/{isbn}", response_model=BookSchema)
+def update_existing_book(isbn: str, updated_book: BookUpdate):
+    found_book = library.find_book(isbn)
+    if not found_book:
+        raise HTTPException(status_code=404, detail="Kitap bulunamadı.")
+    
+    library.update_book(isbn, updated_book.title, updated_book.author)
+    
+    updated_book_obj = library.find_book(isbn)
+    return updated_book_obj
+
 @app.delete("/books/{isbn}")
 def remove_existing_book(isbn: str):
     book_to_remove = library.find_book(isbn)
     if not book_to_remove:
-        raise HTTPException(status_code=404, detail="Kitap bulunamadı")
+        raise HTTPException(status_code=404, detail="Kitap bulunamadı.")
     
     library.remove_book(isbn)
     return {"message": f"Kitap '{isbn}' başarıyla silindi."}

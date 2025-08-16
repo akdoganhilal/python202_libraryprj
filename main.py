@@ -1,3 +1,5 @@
+import httpx
+import json
 from library import Library
 from book import Book
 
@@ -16,11 +18,45 @@ def main():
     while True:
         display_menu()
         choice = input("Lütfen bir seçenek girin: ")
-        
+
         if choice == '1':
             isbn = input("Kitabın ISBN numarasını girin: ")
-            library.add_book(isbn)
+            
+            api_url = f"https://openlibrary.org/isbn/{isbn}.json"
+            
+            try:
+                response = httpx.get(api_url, follow_redirects=True)
+                response.raise_for_status()
+                book_data = response.json()
+                
+                title = book_data.get("title", "Başlık bilgisi bulunamadı")
+                author = "Yazar bilgisi bulunamadı"
+                
+                authors_data = book_data.get("authors")
+                if authors_data and isinstance(authors_data, list) and authors_data[0].get("key"):
+                    first_author_key = authors_data[0].get("key")
+                    author_api_url = f"https://openlibrary.org{first_author_key}.json"
+                    
+                    try:
+                        author_response = httpx.get(author_api_url)
+                        author_response.raise_for_status()
+                        author_data = author_response.json()
+                        author = author_data.get("name", "Yazar bilgisi bulunamadı")
+                    except (httpx.HTTPStatusError, httpx.RequestError):
+                        pass
 
+                new_book = Book(title, author, isbn)
+                library.add_book(new_book)
+                
+            except httpx.HTTPStatusError as exc:
+                print(f"Hata: ISBN numarası '{isbn}' ile kitap bulunamadı. (Hata Kodu: {exc.response.status_code})")
+            except httpx.RequestError as exc:
+                print(f"İstek Hatası: İnternet bağlantısı veya API'de sorun olabilir. Detay: {exc}")
+            except json.JSONDecodeError:
+                print("Hata: API'den geçersiz bir JSON yanıtı alındı.")
+            except Exception as e:
+                print(f"Beklenmedik bir hata oluştu: {e}")
+        
         elif choice == '2':
             isbn = input("Silmek istediğiniz kitabın ISBN numarasını girin: ")
             library.remove_book(isbn)
