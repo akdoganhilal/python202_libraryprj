@@ -3,10 +3,15 @@ Bu proje, Python'da Nesne Yönelimli Programlama (OOP), harici API kullanımı v
 
 ### Proje Özellikleri
 **OOP**: *Book* ve *Library* sınıfları kullanılarak kod, modüler ve yönetilebilir bir yapıda tasarlanmıştır.
+
 **Harici API Entegrasyonu**: Open Library API'si üzerinden ISBN numarasıyla kitap bilgileri otomatik olarak çekilir.
+
 **Veritabanı**: Veriler, kalıcı olarak bir SQLite veritabanında saklanır.
+
 **RESTful API**: FastAPI ile kitapları listeleme, ekleme, silme ve güncelleme işlemleri için RESTful endpoint'ler oluşturulmuştur.
+
 **Web Arayüzü**: Kendi API'mizi kullanan, HTML, CSS ve JavaScript ile geliştirilmiş basit bir yönetim paneli mevcuttur.
+
 **Docker Desteği**: Proje, bir Docker konteyneri içinde çalıştırılabilir.
 
 ---
@@ -57,11 +62,15 @@ API servisi çalıştıktan sonra, projenin ana dizinindeki *frontend/index.html
 
 ## API Endpoint'leri
 **GET /books**: Kütüphanedeki tüm kitapların listesini döndürür.
+
 **GET /books/{isbn}**: Belirtilen ISBN'e sahip kitabı getirir.
+
 **POST /books**: Yeni bir kitabı API'den çekerek ekler.
 *Gövde Örneği*: *{"isbn": "9780451524935"}*
+
 **PUT /books/{isbn}**: Bir kitabın başlık ve/veya yazar bilgilerini günceller.
 *Gövde Örneği*: *{"title": "Yeni Başlık"}*
+
 **DELETE /books/{isbn}**: Belirtilen ISBN'e sahip kitabı siler.
 
 ***
